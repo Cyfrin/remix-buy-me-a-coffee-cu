@@ -69,3 +69,9 @@ def get_funder(index: uint256) -> address:
 @view
 def get_owner() -> address:
     return OWNER
+
+
+@external
+@payable
+def __default__():
+    pass
