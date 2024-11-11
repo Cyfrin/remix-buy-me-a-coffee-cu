@@ -74,3 +74,11 @@ def get_funder(index: uint256) -> address:
 @payable
 def __default__():
     pass
+
+# @external 
+# @view 
+# def get_price() -> int256:
+#     price_feed: AggregatorV3Interface = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306)
+#     # ABI
+#     # Addresss
+#     return staticcall price_feed.latestAnswer()
