@@ -82,3 +82,11 @@ def __default__():
 #     # ABI
 #     # Addresss
 #     return staticcall price_feed.latestAnswer()
+
+# 4 / 2 = 2
+# # 6 / 3 = 2
+# # 7 / 3 = 2 (remove all decimals)
+# @external 
+# @view 
+# def divide_me(number: uint256) -> uint256:
+#     return number // 3
