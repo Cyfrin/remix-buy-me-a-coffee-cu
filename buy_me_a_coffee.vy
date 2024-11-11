@@ -11,8 +11,7 @@ interface AggregatorV3Interface:
     def decimals() -> uint8: view
     def description() -> String[1000]: view
     def version() -> uint256: view
-    def getRoundData(_roundId: uint80) -> (uint80, int256, uint256, uint256, uint80): view
-    def latestRoundData() -> (uint80, int256, uint256, uint256, uint80): view
+    def latestAnswer() -> int256: view
 
 # minimum_usd_decimals: public(constant(decimal)) = 50.0 
 MINIMUM_USD: public(constant(uint256)) = 50 * (10**18)
@@ -37,6 +36,7 @@ def _only_owner():
 @external
 @payable
 def fund():
+    # as_wei_value
     usd_value_of_eth: uint256 = self._get_eth_to_usd_rate(self.price_feed, msg.value)
     assert usd_value_of_eth >= MINIMUM_USD, "You need to spend more ETH!"
     self.address_to_amount_funded[msg.sender] += msg.value
@@ -55,13 +55,7 @@ def withdraw():
 @view
 def _get_eth_to_usd_rate(price_feed: AggregatorV3Interface, eth_amount: uint256) -> uint256:
     # Check the conversion rate
-    a: uint80 = 0
-    price: int256 = 0
-    b: uint256 = 0
-    c: uint256 = 0
-    d: uint80 = 0
-    (a, price, b, c, d) = staticcall price_feed.latestRoundData()
-    # We know the price has 8 decimals, so we need to add 10
+    price: int256 = staticcall price_feed.latestAnswer()
     eth_price: uint256 = (convert(price, uint256)) * (10**10)
     eth_amount_in_usd: uint256 = (eth_price * eth_amount) // PRECISION
     return eth_amount_in_usd
