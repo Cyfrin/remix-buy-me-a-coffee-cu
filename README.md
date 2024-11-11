@@ -6,7 +6,6 @@ This is part of the Cyfrin Updraft Vyper Course.
 
 1. Go to [Remix](https://remix.ethereum.org/)
    1. Or just [click here!](https://remix.ethereum.org/#url=https://github.com/Cyfrin/remix-buy-me-a-coffee-cu/buy_me_a_coffee.vy)
-2. Paste the code from `buy_me_a_coffee.vy` and `interfaces/AggregatorV3Interface.vyi` into a new file in Remix
 3. Hit `Compile`
 4. Hit `Deploy`
 
