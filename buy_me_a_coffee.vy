@@ -1,11 +1,11 @@
+# pragma version 0.4.0 
 """
-@ pragma version 0.4.0
-@ pragma enable-decimals
-@ license: MIT
-@ title A sample buy-me-a-coffee contract
-@ author You!
-@ notice This contract is for creating a sample funding contract
+@license MIT 
+@title Buy Me A Coffee!
+@author You!
+@notice This contract is for creating a sample funding contract
 """
+
 # We'll learn a new way to do interfaces later...
 interface AggregatorV3Interface:
     def decimals() -> uint8: view
@@ -13,67 +13,75 @@ interface AggregatorV3Interface:
     def version() -> uint256: view
     def latestAnswer() -> int256: view
 
-# minimum_usd_decimals: public(constant(decimal)) = 50.0 
-MINIMUM_USD: public(constant(uint256)) = 50 * (10**18)
-PRECISION: constant(uint256) = 1 * (10**18)
+# Constants & Immutables
+MINIMUM_USD: public(constant(uint256)) = as_wei_value(5, "ether")
+PRICE_FEED: public(immutable(AggregatorV3Interface)) # 0x694AA1769357215DE4FAC081bf1f309aDC325306 sepolia
 OWNER: public(immutable(address))
+PRECISION: constant(uint256) = 1 * (10 ** 18)
 
-funders: public(DynArray[address, 100])
-address_to_amount_funded: public(HashMap[address, uint256])
-price_feed: public(AggregatorV3Interface)
+# Storage
+funders: public(DynArray[address, 1000])
+funder_to_amount_funded: public(HashMap[address, uint256])
 
+# With constants: 262,853
 @deploy
 def __init__(price_feed: address):
-    self.price_feed = AggregatorV3Interface(price_feed)
+    PRICE_FEED = AggregatorV3Interface(price_feed)
     OWNER = msg.sender
-
-
-@internal
-def _only_owner():
-    assert msg.sender == OWNER, "Not the contract owner"
-
 
 @external
 @payable
 def fund():
-    # as_wei_value
-    usd_value_of_eth: uint256 = self._get_eth_to_usd_rate(self.price_feed, msg.value)
-    assert usd_value_of_eth >= MINIMUM_USD, "You need to spend more ETH!"
-    self.address_to_amount_funded[msg.sender] += msg.value
+    self._fund()
+
+@internal
+@payable
+def _fund():
+    """Allows users to send $ to this contract
+    Have a minimum $ amount to send
+
+    How do we convert the ETH amount to dollars amount?
+    """
+    usd_value_of_eth: uint256 = self._get_eth_to_usd_rate(msg.value)
+    assert usd_value_of_eth >= MINIMUM_USD, "You must spend more ETH!"
     self.funders.append(msg.sender)
+    self.funder_to_amount_funded[msg.sender] += msg.value
 
 
 @external
 def withdraw():
-    self._only_owner()
-    for funder: address in self.funders:
-        self.address_to_amount_funded[funder] = 0
-    self.funders = []
+    """Take the money out of the contract, that people sent via the fund function.
+
+    How do we make sure only we can pull the money out?
+    """
+    assert msg.sender == OWNER, "Not the contract owner!"
     send(OWNER, self.balance)
+    # resetting
+    for funder: address in self.funders:
+        self.funder_to_amount_funded[funder] = 0
+    self.funders = []
 
 @internal
 @view
-def _get_eth_to_usd_rate(price_feed: AggregatorV3Interface, eth_amount: uint256) -> uint256:
-    # Check the conversion rate
-    price: int256 = staticcall price_feed.latestAnswer()
+def _get_eth_to_usd_rate(eth_amount: uint256) -> uint256:
+    """
+    Chris sent us 0.01 ETH for us to buy a coffee
+    Is that more or less than $5?
+    """
+    price: int256 = staticcall PRICE_FEED.latestAnswer() 
     eth_price: uint256 = (convert(price, uint256)) * (10**10)
     eth_amount_in_usd: uint256 = (eth_price * eth_amount) // PRECISION
-    return eth_amount_in_usd
+    return eth_amount_in_usd # 18 0's, 18 decimal places
 
-@external
-@view
-def get_version() -> uint256:
-    return staticcall self.price_feed.version()
+@external 
+@view 
+def get_eth_to_usd_rate(eth_amount: uint256) -> uint256:
+    return self._get_eth_to_usd_rate(eth_amount)
 
-@external
-@view
-def get_funder(index: uint256) -> address:
-    return self.funders[index]
-
-@external
-@payable
+@external 
+@payable 
 def __default__():
-    pass
+    self._fund()
 
 # @external 
 # @view 
