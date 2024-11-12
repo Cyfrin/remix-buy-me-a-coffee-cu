@@ -4,7 +4,7 @@ This is part of the Cyfrin Updraft Vyper Course.
 
 ## Getting Started
 
-1. Go to [Remix](https://remix.ethereum.org/)
+1. Go to [Remix](https://remix.ethereum.org/) and copy and paste the code from `buy_me_a_coffee.vy`
    1. Or just [click here!](https://remix.ethereum.org/#url=https://github.com/Cyfrin/remix-buy-me-a-coffee-cu/buy_me_a_coffee.vy)
 3. Hit `Compile`
 4. Hit `Deploy`
