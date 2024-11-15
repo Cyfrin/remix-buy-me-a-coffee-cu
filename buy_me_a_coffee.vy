@@ -55,7 +55,8 @@ def withdraw():
     How do we make sure only we can pull the money out?
     """
     assert msg.sender == OWNER, "Not the contract owner!"
-    send(OWNER, self.balance)
+    raw_call(OWNER, b"", value = self.balance)
+    # send(OWNER, self.balance)
     # resetting
     for funder: address in self.funders:
         self.funder_to_amount_funded[funder] = 0
