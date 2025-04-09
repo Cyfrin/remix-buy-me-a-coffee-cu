@@ -1,3 +1,4 @@
+# pragma version 0.4.1
 dynamic_array: public(DynArray[uint256, 100]) # length will start at 0
 # and everytime you add something to the array/list it'll grow in size
 fixed_sized_array: public(uint256[100]) # "length of this array = 100"
